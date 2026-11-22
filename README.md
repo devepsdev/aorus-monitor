@@ -44,3 +44,7 @@ powershell -ExecutionPolicy Bypass -File Installer\compilar.ps1
 Gráficos (icono e imágenes del instalador): `Tools\generar-graficos.ps1`.
 
 Opciones: `--minimizado`, `--arranque si|no`, `--tarea-abrir si|no`, `--restaurar`, `--probe archivo` (diagnóstico de solo lectura), `--snapshot carpeta` (capturas de la interfaz).
+
+## Licencia
+
+[MIT](LICENSE). Se usa bajo tu responsabilidad: controla los ventiladores a través de la BIOS y no está afiliado a GIGABYTE.
