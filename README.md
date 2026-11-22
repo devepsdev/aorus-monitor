@@ -17,7 +17,8 @@ No toca frecuencias, voltajes ni límites de potencia del procesador.
 
 ## Instalación
 
-`Installer\salida\AorusMonitor-<versión>-instalador.exe`:
+Descarga `AorusMonitor-<versión>-instalador.exe` desde [Releases](https://github.com/devepsdev/aorus-monitor/releases/latest)
+(o compílalo tú: queda en `Installer\salida\`):
 
 - Instala en `C:\Program Files\AORUS Monitor` y crea accesos directos en el escritorio y en el menú Inicio.
 - Registra la interfaz WMI de ventiladores (`Wmi\gb_wmiacpi.mof`, sin software de Gigabyte).
