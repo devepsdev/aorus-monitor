@@ -1,0 +1,14 @@
+# Compilación
+bin/
+obj/
+publicar/
+Installer/salida/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# Claude Code (local)
+.claude/settings.local.json

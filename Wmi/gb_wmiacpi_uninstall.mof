@@ -1,0 +1,5 @@
+// Quita las clases registradas por gb_wmiacpi.mof (ejecutar como administrador):
+//   mofcomp gb_wmiacpi_uninstall.mof
+#pragma namespace("\\\\.\\root\\WMI")
+#pragma deleteclass("GB_WMIACPI_Get", NOFAIL)
+#pragma deleteclass("GB_WMIACPI_Set", NOFAIL)

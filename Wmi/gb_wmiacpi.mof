@@ -1,0 +1,89 @@
+// gb_wmiacpi.mof - Declaración propia (mínima) de la interfaz ACPI-WMI de Gigabyte
+// para AORUS Monitor. No contiene software ni binarios de Gigabyte: solo declara
+// las clases que el firmware (BIOS) ya expone mediante sus GUID ACPI (_WDG).
+//
+// Solo incluye lectura de sensores y control de ventiladores. Nada de potencia,
+// frecuencias ni voltajes del procesador.
+//
+// Registrar (como administrador):   mofcomp gb_wmiacpi.mof
+// Quitar:                           mofcomp gb_wmiacpi_uninstall.mof
+
+#pragma namespace("\\\\.\\root\\WMI")
+
+[WMI, Dynamic, Provider("WmiProv"), Locale("MS\\0x409"),
+ Description("Gigabyte WMI Get method (AORUS Monitor)"),
+ guid("{ABBC0F6F-8EA1-11d1-00A0-C90629100000}")]
+class GB_WMIACPI_Get
+{
+    [key, read] string InstanceName;
+    [read] boolean Active;
+
+    [WmiMethodId(225), Implemented, read, write, Description("getCpuTemperature")]
+    void getCpuTemp([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(226), Implemented, read, write, Description("getGpuTemperature1")]
+    void getGpuTemp1([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(227), Implemented, read, write, Description("getGpuTemperature2")]
+    void getGpuTemp2([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(228), Implemented, read, write, Description("getRpm1")]
+    void getRpm1([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(229), Implemented, read, write, Description("getRpm2")]
+    void getRpm2([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(70), Implemented, read, write, Description("Get CPU Fan Duty")]
+    void GetCPUFanDuty([out, ID(0), Description("Data")] uint8 Data);
+
+    [WmiMethodId(71), Implemented, read, write, Description("Get GPU Fan Duty")]
+    void GetGPUFanDuty([out, ID(0), Description("Data")] uint8 Data);
+
+    [WmiMethodId(103), Implemented, read, write, Description("Get 10 Steps Fan Status")]
+    void GetStepFanStatus([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(106), Implemented, read, write, Description("Get Fixed Fan Status")]
+    void GetFixedFanStatus([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(107), Implemented, read, write, Description("Get Fixed Fan Speed")]
+    void GetFixedFanSpeed([out, ID(0), Description("Data")] uint16 Data);
+
+    [WmiMethodId(113), Implemented, read, write, Description("Getting Auto Fan Status")]
+    void GetAutoFanStatus([out, ID(0), Description("Data")] uint8 Data);
+};
+
+[WMI, Dynamic, Provider("WmiProv"), Locale("MS\\0x409"),
+ Description("Gigabyte WMI Set method (AORUS Monitor)"),
+ guid("{ABBC0F75-8EA1-11d1-00A0-C90629100000}")]
+class GB_WMIACPI_Set
+{
+    [key, read] string InstanceName;
+    [read] boolean Active;
+
+    [WmiMethodId(71), Implemented, read, write, Description("Set GPU Fan Duty")]
+    void SetGPUFanDuty([in, ID(0), Description("GPUFanDutyData")] uint8 Data,
+                       [out, ID(1), Description("Data")] uint8 DataOut);
+
+    [WmiMethodId(88), Implemented, read, write, Description("Set Super Quiet")]
+    void SetSuperQuiet([in, ID(0), Description("Data")] uint8 Data);
+
+    [WmiMethodId(102), Implemented, read, write, Description("Set Current Fan Step")]
+    void SetCurrentFanStep([in, ID(0), Description("Data")] uint8 Data,
+                           [out, ID(1), Description("Data")] uint8 DataOut);
+
+    [WmiMethodId(103), Implemented, read, write, Description("Set 10 Steps Fan Status")]
+    void SetStepFanStatus([in, ID(0), Description("SetStepFanStatusData")] uint8 Data,
+                          [out, ID(1), Description("Data")] uint8 DataOut);
+
+    [WmiMethodId(106), Implemented, read, write, Description("Set Fixed Fan Status")]
+    void SetFixedFanStatus([in, ID(0), Description("FixedFanStatusData")] uint8 Data,
+                           [out, ID(1), Description("Data")] uint8 DataOut);
+
+    [WmiMethodId(107), Implemented, read, write, Description("Set Fixed Fan Speed")]
+    void SetFixedFanSpeed([in, ID(0), Description("FixedFanSpeedData")] uint8 Data,
+                          [out, ID(1), Description("Data")] uint8 DataOut);
+
+    [WmiMethodId(113), Implemented, read, write, Description("Set Auto Fan Status")]
+    void SetAutoFanStatus([in, ID(0), Description("AutoFanData")] uint8 Data,
+                          [out, ID(1), Description("Data")] uint8 DataOut);
+};

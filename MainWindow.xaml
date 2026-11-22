@@ -1,0 +1,511 @@
+﻿<Window x:Class="AorusMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:AorusMonitor.Controls"
+        Title="AORUS Monitor" Width="1220" Height="800" MinWidth="1060" MinHeight="700"
+        Background="{StaticResource Bg}" WindowStartupLocation="CenterScreen" Icon="Assets/icono.ico"
+        FontFamily="{StaticResource UiFont}" UseLayoutRounding="True">
+    <Grid Background="{StaticResource Bg}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ Barra lateral ============ -->
+        <Border Background="{StaticResource Side}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="22,26,22,26">
+                    <TextBlock Text="AORUS" FontSize="26" FontWeight="Bold" Foreground="{StaticResource Accent}" FontFamily="{StaticResource NumFont}"/>
+                    <TextBlock Text="MONITOR" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Muted}" Margin="2,-2,0,0"/>
+                    <TextBlock x:Name="ModelText" Text="AORUS 15G XC" FontSize="12" Foreground="{StaticResource Muted}" Margin="2,14,0,0"/>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="22,0,22,20">
+                    <Button Click="Mini_Click" Margin="0,0,0,18" Padding="12,9" HorizontalAlignment="Stretch"
+                            ToolTip="Ventana flotante semitransparente con CPU, GPU, ventiladores y memoria">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8A7;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"
+                                       Foreground="{StaticResource Accent}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Mini monitor" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <Ellipse x:Name="DotWmi" Width="8" Height="8" Fill="{StaticResource Muted}" VerticalAlignment="Center"/>
+                        <TextBlock Text="Ventiladores (WMI)" Style="{StaticResource Label}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <Ellipse x:Name="DotKb" Width="8" Height="8" Fill="{StaticResource Muted}" VerticalAlignment="Center"/>
+                        <TextBlock Text="Teclado RGB" Style="{StaticResource Label}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <Ellipse x:Name="DotAdmin" Width="8" Height="8" Fill="{StaticResource Muted}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="AdminText" Text="Administrador" Style="{StaticResource Label}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel>
+                    <RadioButton x:Name="NavPanel" Style="{StaticResource NavButton}" Tag="&#xE80F;" Content="Panel" IsChecked="True" Checked="Nav_Checked"/>
+                    <RadioButton x:Name="NavFans" Style="{StaticResource NavButton}" Tag="&#xE9CA;" Content="Ventiladores" Checked="Nav_Checked"/>
+                    <RadioButton x:Name="NavRgb" Style="{StaticResource NavButton}" Tag="&#xE765;" Content="Iluminación" Checked="Nav_Checked"/>
+                    <RadioButton x:Name="NavSys" Style="{StaticResource NavButton}" Tag="&#xE713;" Content="Sistema" Checked="Nav_Checked"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ============ Contenido ============ -->
+        <DockPanel Grid.Column="1">
+            <!-- Avisos -->
+            <Border x:Name="Banner" DockPanel.Dock="Top" Background="#2AFFB020" BorderBrush="#66FFB020" BorderThickness="1"
+                    CornerRadius="8" Margin="20,16,20,0" Padding="14,10" Visibility="Collapsed">
+                <DockPanel>
+                    <Button x:Name="BannerButton" DockPanel.Dock="Right" Content="Acción" Padding="12,5" Click="BannerButton_Click" Margin="12,0,0,0"/>
+                    <TextBlock x:Name="BannerText" Text="" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13"/>
+                </DockPanel>
+            </Border>
+            <Border x:Name="Toast" DockPanel.Dock="Top" Background="#263AA0FF" BorderBrush="#663AA0FF" BorderThickness="1"
+                    CornerRadius="8" Margin="20,10,20,0" Padding="14,8" Visibility="Collapsed">
+                <TextBlock x:Name="ToastText" TextWrapping="Wrap" FontSize="13"/>
+            </Border>
+
+            <Grid Margin="14,10,14,14">
+                <!-- ================= PANEL ================= -->
+                <Grid x:Name="PagePanel">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.ColumnSpan="3" Margin="8,4,8,6">
+                        <TextBlock Text="Panel" Style="{StaticResource PageTitle}"/>
+                        <TextBlock x:Name="PanelSubtitle" Text="Lecturas en tiempo real cada segundo" Style="{StaticResource Label}"/>
+                    </StackPanel>
+
+                    <!-- CPU -->
+                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorder}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock Text="PROCESADOR" Style="{StaticResource CardTitle}"/>
+                                <TextBlock x:Name="CpuName" Text="Intel Core i7-10870H" Style="{StaticResource Label}" HorizontalAlignment="Right" FontSize="11"/>
+                            </DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock x:Name="CpuTemp" Text="--" Style="{StaticResource BigNum}"/>
+                                <TextBlock Text="°C" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Top" Margin="4,10,0,0"/>
+                            </StackPanel>
+                            <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                <TextBlock Text="Carga" Style="{StaticResource Label}"/>
+                                <TextBlock x:Name="CpuLoad" Grid.Column="1" Text="--" Style="{StaticResource Value}"/>
+                                <TextBlock Grid.Row="1" Text="Frecuencia media" Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="CpuClock" Grid.Row="1" Grid.Column="1" Text="--" Style="{StaticResource Value}" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="2" Text="Consumo" Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="CpuPower" Grid.Row="2" Grid.Column="1" Text="--" Style="{StaticResource Value}" Margin="0,4,0,0"/>
+                            </Grid>
+                            <c:Sparkline x:Name="CpuSpark" Stroke="{StaticResource Accent}" Min="30" Max="100" Margin="0,6,0,0" MinHeight="40"/>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- GPU -->
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock Text="GRÁFICA" Style="{StaticResource CardTitle}"/>
+                                <TextBlock Text="RTX 3070 Laptop" Style="{StaticResource Label}" HorizontalAlignment="Right" FontSize="11"/>
+                            </DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock x:Name="GpuTemp" Text="--" Style="{StaticResource BigNum}"/>
+                                <TextBlock Text="°C" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Top" Margin="4,10,0,0"/>
+                                <TextBlock x:Name="GpuHot" Text="" Style="{StaticResource Label}" VerticalAlignment="Bottom" Margin="10,0,0,9"/>
+                            </StackPanel>
+                            <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                <TextBlock Text="Carga" Style="{StaticResource Label}"/>
+                                <TextBlock x:Name="GpuLoad" Grid.Column="1" Text="--" Style="{StaticResource Value}"/>
+                                <TextBlock Grid.Row="1" Text="Núcleo / Memoria" Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="GpuClock" Grid.Row="1" Grid.Column="1" Text="--" Style="{StaticResource Value}" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="2" Text="Consumo" Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="GpuPower" Grid.Row="2" Grid.Column="1" Text="--" Style="{StaticResource Value}" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="3" Text="VRAM" Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="GpuVram" Grid.Row="3" Grid.Column="1" Text="--" Style="{StaticResource Value}" Margin="0,4,0,0"/>
+                            </Grid>
+                            <c:Sparkline x:Name="GpuSpark" Stroke="{StaticResource GpuGreen}" Min="30" Max="100" Margin="0,6,0,0" MinHeight="40"/>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Ventiladores -->
+                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CardBorder}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top">
+                                <TextBlock Text="VENTILADORES" Style="{StaticResource CardTitle}"/>
+                                <TextBlock x:Name="FanModeSmall" Text="--" Style="{StaticResource Label}" HorizontalAlignment="Right" FontSize="11" Foreground="{StaticResource Accent}"/>
+                            </DockPanel>
+                            <Grid DockPanel.Dock="Top" Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock x:Name="FanCpu" Text="--" Style="{StaticResource BigNum}" FontSize="30"/>
+                                    <TextBlock Text="RPM · CPU" Style="{StaticResource Label}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock x:Name="FanGpu" Text="--" Style="{StaticResource BigNum}" FontSize="30"/>
+                                    <TextBlock Text="RPM · GPU" Style="{StaticResource Label}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="FanHint" DockPanel.Dock="Bottom" Text="" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                            <c:Sparkline x:Name="FanSpark" Stroke="{StaticResource Blue}" Min="0" Max="7000" Margin="0,10,0,0" MinHeight="40"/>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Memoria -->
+                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="MEMORIA" Style="{StaticResource CardTitle}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock x:Name="RamPct" Text="--" Style="{StaticResource BigNum}"/>
+                                <TextBlock Text="%" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Top" Margin="4,10,0,0"/>
+                            </StackPanel>
+                            <Grid Height="6" Margin="0,8,0,8">
+                                <Border Background="{StaticResource Line}" CornerRadius="3"/>
+                                <Border x:Name="RamBar" Background="{StaticResource Accent}" CornerRadius="3" HorizontalAlignment="Left" Width="0"/>
+                            </Grid>
+                            <TextBlock x:Name="RamText" Text="--" Style="{StaticResource Label}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Batería -->
+                    <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="BATERÍA" Style="{StaticResource CardTitle}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock x:Name="BatPct" Text="--" Style="{StaticResource BigNum}"/>
+                                <TextBlock Text="%" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Top" Margin="4,10,0,0"/>
+                            </StackPanel>
+                            <Grid Height="6" Margin="0,8,0,8">
+                                <Border Background="{StaticResource Line}" CornerRadius="3"/>
+                                <Border x:Name="BatBar" Background="{StaticResource Good}" CornerRadius="3" HorizontalAlignment="Left" Width="0"/>
+                            </Grid>
+                            <TextBlock x:Name="BatText" Text="--" Style="{StaticResource Label}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Discos -->
+                    <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="ALMACENAMIENTO" Style="{StaticResource CardTitle}"/>
+                            <ItemsControl x:Name="DiskList" Margin="0,10,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="0,0,0,8">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Value}" Style="{StaticResource Value}"/>
+                                            <TextBlock Text="{Binding Key}" Style="{StaticResource Label}" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="DiskEmpty" Text="Sin datos de temperatura de disco." Style="{StaticResource Label}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ================= VENTILADORES ================= -->
+                <Grid x:Name="PageFans" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Margin="8,4,8,6">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel Margin="0,0,24,0">
+                                <TextBlock x:Name="FansLiveTemp" Text="--" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                <TextBlock Text="temp. máx. CPU/GPU" Style="{StaticResource Label}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="FansLiveRpm" Text="--" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                <TextBlock Text="RPM CPU / GPU" Style="{StaticResource Label}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Ventiladores" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="Elige un modo. Los cambios se aplican al instante y se recuerdan al reiniciar." Style="{StaticResource Label}"/>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <UniformGrid x:Name="ModeGrid" Grid.Row="1" Columns="6" Margin="3,4,3,4">
+                        <RadioButton x:Name="ModeNormal" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Normal" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Normal" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Curva de la BIOS" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="ModeQuiet" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Silencioso" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Silencioso" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Mínimo ruido" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="ModeGaming" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Gaming" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Gaming" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Auto, sube antes" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="ModeTurbo" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Turbo" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Turbo" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Al 100 %" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="ModeManual" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Manual" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Manual" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Velocidad fija" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="ModeCurve" Style="{StaticResource ModeCard}" GroupName="FanMode" Tag="Curva" Click="Mode_Click">
+                            <StackPanel>
+                                <TextBlock Text="Curva" FontSize="15" FontWeight="SemiBold"/>
+                                <TextBlock Text="Personalizada" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </UniformGrid>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="300"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource CardBorder}">
+                            <DockPanel>
+                                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                        <Button Content="Restablecer" Click="CurveReset_Click" Margin="0,0,8,0" Padding="12,6"/>
+                                        <Button x:Name="CurveApply" Content="Aplicar curva" Style="{StaticResource AccentButton}" Click="CurveApply_Click" Padding="12,6"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="CURVA PERSONALIZADA" Style="{StaticResource CardTitle}"/>
+                                        <TextBlock Text="Arrastra los puntos. Mínimos de seguridad: 60 % a 80 °C y 90 % a 90 °C." Style="{StaticResource Label}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <c:CurveEditor x:Name="Curve" MinHeight="220"/>
+                            </DockPanel>
+                        </Border>
+
+                        <StackPanel Grid.Column="1">
+                            <Border Style="{StaticResource CardBorder}">
+                                <StackPanel>
+                                    <TextBlock Text="VELOCIDAD MANUAL" Style="{StaticResource CardTitle}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBlock x:Name="ManualValue" Text="50" Style="{StaticResource BigNum}" FontSize="30"/>
+                                        <TextBlock Text="%" FontSize="14" Foreground="{StaticResource Muted}" VerticalAlignment="Top" Margin="3,8,0,0"/>
+                                    </StackPanel>
+                                    <Slider x:Name="ManualSlider" Minimum="20" Maximum="100" Value="50" SmallChange="5" LargeChange="10"
+                                            ValueChanged="ManualSlider_ValueChanged" Margin="0,6,0,0"/>
+                                    <Button x:Name="ManualApply" Content="Aplicar velocidad" Style="{StaticResource AccentButton}" Click="ManualApply_Click" Margin="0,10,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardBorder}">
+                                <StackPanel>
+                                    <TextBlock Text="PROTECCIÓN" Style="{StaticResource CardTitle}"/>
+                                    <TextBlock TextWrapping="Wrap" Style="{StaticResource Label}" Margin="0,6,0,0" LineHeight="18"
+                                               Text="Si la CPU o la GPU pasan de 95 °C durante 5 s, los ventiladores van al máximo hasta bajar de 80 °C. Al cerrar la app, los modos Manual y Curva vuelven a Normal."/>
+                                    <TextBlock x:Name="FanStatus" Text="" TextWrapping="Wrap" FontSize="12" Margin="0,10,0,0" Foreground="{StaticResource Accent}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- ================= ILUMINACIÓN ================= -->
+                <Grid x:Name="PageRgb" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Margin="8,4,8,6">
+                        <TextBlock x:Name="RgbStatus" DockPanel.Dock="Right" Text="" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <TextBlock Text="Iluminación del teclado" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="Efectos de hardware (se mantienen sin la app abierta) y color RGB libre." Style="{StaticResource Label}"/>
+                        </StackPanel>
+                    </DockPanel>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource CardBorder}" Padding="8,10">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="EFECTO" Style="{StaticResource CardTitle}" Margin="8,0,0,6"/>
+                                <ListBox x:Name="EffectList" Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource EffectItem}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="EffectList_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontSize="13"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="20,16">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <!-- Vista previa -->
+                                    <Border x:Name="PreviewBox" Height="70" CornerRadius="10" BorderBrush="{StaticResource Line}" BorderThickness="1">
+                                        <Border.Background>
+                                            <LinearGradientBrush x:Name="PreviewBrush" StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#FF6A00" Offset="0"/>
+                                                <GradientStop Color="#FF6A00" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock x:Name="PreviewText" Text="Estático" FontSize="18" FontWeight="SemiBold" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Effect>
+                                                <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                                            </TextBlock.Effect>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <!-- Colores del firmware (efectos de hardware) -->
+                                    <StackPanel x:Name="PresetPanel" Margin="0,18,0,0">
+                                        <TextBlock Text="COLOR" Style="{StaticResource CardTitle}"/>
+                                        <WrapPanel x:Name="PresetButtons" Margin="0,8,0,0"/>
+                                        <TextBlock Text="Los efectos de hardware usan los colores del firmware. Para cualquier tono, elige «Color libre (RGB)»."
+                                                   Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Color libre RGB -->
+                                    <StackPanel x:Name="ColorPanel" Margin="0,18,0,0">
+                                        <TextBlock x:Name="Color1Title" Text="COLOR LIBRE" Style="{StaticResource CardTitle}"/>
+                                        <WrapPanel x:Name="Swatches1" Margin="0,8,0,0"/>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="18"/><ColumnDefinition/><ColumnDefinition Width="40"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                            <TextBlock Text="R" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                                            <Slider x:Name="R1" Grid.Column="1" Maximum="255" ValueChanged="Color_Changed"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=R1, StringFormat=0}" Style="{StaticResource Value}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="1" Text="G" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                                            <Slider x:Name="G1" Grid.Row="1" Grid.Column="1" Maximum="255" ValueChanged="Color_Changed"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Value, ElementName=G1, StringFormat=0}" Style="{StaticResource Value}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="2" Text="B" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                                            <Slider x:Name="B1" Grid.Row="2" Grid.Column="1" Maximum="255" ValueChanged="Color_Changed"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Value, ElementName=B1, StringFormat=0}" Style="{StaticResource Value}" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                            <TextBlock Text="Hex" Style="{StaticResource Label}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBox x:Name="Hex1" Width="90" LostFocus="Hex_LostFocus" KeyDown="Hex_KeyDown"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Brillo / velocidad -->
+                                    <Grid Margin="0,18,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="24"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <DockPanel>
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding Value, ElementName=BrightSlider, StringFormat={}{0:0} %}" Style="{StaticResource Value}"/>
+                                                <TextBlock Text="BRILLO" Style="{StaticResource CardTitle}"/>
+                                            </DockPanel>
+                                            <Slider x:Name="BrightSlider" Maximum="100" Value="70" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel x:Name="SpeedPanel" Grid.Column="2">
+                                            <DockPanel>
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding Value, ElementName=SpeedSlider, StringFormat={}{0:0} %}" Style="{StaticResource Value}"/>
+                                                <TextBlock Text="VELOCIDAD" Style="{StaticResource CardTitle}"/>
+                                            </DockPanel>
+                                            <Slider x:Name="SpeedSlider" Maximum="100" Value="50" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Dirección -->
+                                    <StackPanel x:Name="DirPanel" Margin="0,16,0,0">
+                                        <TextBlock Text="DIRECCIÓN" Style="{StaticResource CardTitle}"/>
+                                        <WrapPanel x:Name="DirButtons" Margin="0,8,0,0"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                                        <Button x:Name="RgbApply" Content="Aplicar efecto" Style="{StaticResource AccentButton}" Click="RgbApply_Click" Padding="22,9"/>
+                                        <Button Content="Apagar luces" Click="RgbOff_Click" Margin="10,0,0,0" Padding="16,9"/>
+                                        <Button Content="Reconectar" Click="RgbReconnect_Click" Margin="10,0,0,0" Padding="16,9"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- ================= SISTEMA ================= -->
+                <ScrollViewer x:Name="PageSys" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <StackPanel Margin="8,4,8,6">
+                            <TextBlock Text="Sistema" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="Equipo, interfaces de hardware y ajustes" Style="{StaticResource Label}"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CardBorder}">
+                                <StackPanel>
+                                    <TextBlock Text="EQUIPO" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                    <ItemsControl x:Name="SysInfo">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="110"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Key}" Style="{StaticResource Label}"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Value}" FontSize="13" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <Border Style="{StaticResource CardBorder}">
+                                    <StackPanel>
+                                        <TextBlock Text="INTERFAZ WMI DE VENTILADORES" Style="{StaticResource CardTitle}"/>
+                                        <TextBlock x:Name="WmiStatusText" Text="--" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                        <TextBlock Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="18"
+                                                   Text="La registra el instalador (sin Gigabyte Control Center). Solo permite leer sensores y controlar los ventiladores; no toca frecuencias ni potencia del procesador."/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource CardBorder}">
+                                    <StackPanel>
+                                        <TextBlock Text="SENSORES" Style="{StaticResource CardTitle}"/>
+                                        <TextBlock x:Name="SensorStatusText" Text="--" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                        <TextBlock x:Name="KbStatusText" Text="--" FontSize="13" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                        <Button x:Name="PawnIoButton" Content="Instalar driver PawnIO" Click="PawnIo_Click"
+                                                HorizontalAlignment="Left" Margin="0,12,0,0" Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource CardBorder}">
+                                    <StackPanel>
+                                        <TextBlock Text="AJUSTES" Style="{StaticResource CardTitle}"/>
+                                        <CheckBox x:Name="StartupCheck" Content="Iniciar con Windows (en la bandeja, sin aviso de administrador)" Margin="0,10,0,0"
+                                                  Checked="StartupCheck_Changed" Unchecked="StartupCheck_Changed"/>
+                                        <CheckBox x:Name="TrayCheck" Content="Al cerrar la ventana, seguir en la bandeja" Margin="0,10,0,0"
+                                                  Checked="TrayCheck_Changed" Unchecked="TrayCheck_Changed"/>
+                                        <CheckBox x:Name="ReapplyCheck" Content="Reaplicar el modo de ventilador al iniciar" Margin="0,10,0,0"
+                                                  Checked="ReapplyCheck_Changed" Unchecked="ReapplyCheck_Changed"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <TextBlock Text="Valor de registro para 100 %" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                                            <TextBox x:Name="DutyMaxBox" Width="60" Margin="10,0,0,0" LostFocus="DutyMax_LostFocus"/>
+                                        </StackPanel>
+                                        <TextBlock Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                                   Text="229 en el AORUS 15G. Solo cámbialo si en Turbo los ventiladores no llegan al máximo."/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>

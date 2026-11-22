@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- 10.0.19041: API de radios de Windows (tecla Fn de Wi‑Fi) -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>AorusMonitor</AssemblyName>
+    <RootNamespace>AorusMonitor</RootNamespace>
+    <Product>AORUS Monitor</Product>
+    <AssemblyTitle>AORUS Monitor · temperaturas, ventiladores e iluminación</AssemblyTitle>
+    <Company>DevEps</Company>
+    <Copyright>© 2026 DevEps</Copyright>
+    <Version>1.2.2</Version>
+    <ApplicationIcon>Assets\icono.ico</ApplicationIcon>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <DefaultItemExcludes>$(DefaultItemExcludes);publicar\**;dist\**;Installer\**;Tools\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF y WinForms juntos (WinForms solo para los iconos de la bandeja): evitamos choques de nombres -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Wmi\*.mof" CopyToOutputDirectory="PreserveNewest" />
+    <Resource Include="Assets\icono.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HidSharp" Version="2.6.4" />
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.2" />
+    <PackageReference Include="System.Management" Version="10.0.2" />
+  </ItemGroup>
+
+</Project>
